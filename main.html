@@ -7,5 +7,35 @@
 <body>
     <h2>MAIN</h2>
     <button id="inputmemo" onclick="location.href='load.html'">메모 추가</button>
+    <div id="maintitle" name="maintitle">
+    </div>
+<script>
+    //서버에서 메모 데이터 가져오기
+    fetch('/main')
+        .then(response => response.json())
+        .then(data => {
+            const mainTitleDiv = document.getElementById('maintitle');
+
+            //메모 데이터를 동적으로 추가
+            data.memos.forEach(memo => {
+                const memoItem = document.createElement('div');
+                memoItem.classList.add('memo-item');
+
+                const memoTitle = document.createElement('strong');
+                memoTitle.innerText = memo.title;
+
+                memoItem.appendChild(memoTitle);
+
+                memoItem.addEventListener('click', () => {
+                    location.href = `show.html?title=${encodeURIComponent(memo.title)}`;;
+                });
+
+                mainTitleDiv.appendChild(memoItem);
+            });
+        })
+        .catch(error => {
+            console.error('메모 조회 오류:', error);
+        });
+</script>
 </body>
 </html>

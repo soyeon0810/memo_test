@@ -1,1 +1,68 @@
-<!-- 메모 수정 창 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>메모 수정 화면</title>
+</head>
+<body>
+    <h2>메모 수정 화면</h2>
+    <form id=modifymemo action="/modify" method="post">
+        <label>TITLE:</label>
+        <input id="title" name="title" type="text" placeholder="제목을 입력해주세요."><div></div>
+
+        <label>CONTENT:</label>
+        <input id="content" name="content" type="text" placeholder="내용을 입력해주세요."><div></div>
+
+        <input type="submit" value="완료">
+    </form>
+
+    <script>
+        const modifyForm = document.getElementById('modifymemo');
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const memoTitle = urlParams.get('title');
+
+        //수정 화면 로딩 시 클릭한 메모의 정보를 가져와서 입력 필드에 채우기
+        fetch(`/show?title=${encodeURIComponent(memoTitle)}`)
+            .then(response => response.json())
+            .then(data => {
+                const selectedMemo = data.memos.find(memo => memo.title === memoTitle);
+                if (selectedMemo) {
+                    document.getElementById('title').value = selectedMemo.title;
+                    document.getElementById('content').value = selectedMemo.content;
+                }
+            })
+            .catch(error => {
+                console.error('메모 조회 오류:', error);
+            });
+
+        modifyForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+
+            fetch('/modify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/main.html';
+                } else {
+                    console.error('메모 수정 실패:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('메모 수정 오류:', error);
+            });
+        });
+    </script>
+</body>
+</html>

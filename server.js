@@ -124,4 +124,92 @@ app.post('/load', (req, res) => {
     });
 });
 
+//메인 화면
+app.get('/main', (req, res)=>{
+    const sql = 'SELECT title, content FROM memo WHERE userid = ?';
+    const userID=req.session.userID;
+
+    if(!req.session.userID){
+        res.redirect('/login.html');
+        return;
+    }
+
+    const params=[userID];
+
+    connection.query(sql, params, (error, results)=>{
+        if(error){
+            console.err('메모 조회 오류', error);
+        }
+        else{
+            //서버에서 JSON 형태로 메모 데이터 전송
+            res.json({memos: results});
+        }
+    })
+});
+
+//메모 확인
+app.get('/show', (req, res)=>{
+    const sql = 'SELECT title, content FROM memo WHERE userid = ?';
+    const userID=req.session.userID;
+
+    if(!req.session.userID){
+        res.redirect('/login.html');
+        return;
+    }
+
+    const params=[userID];
+
+    connection.query(sql, params, (error, results)=>{
+        if(error){
+            console.err('메모 조회 오류', error);
+        }
+        else{
+            //서버에서 JSON 형태로 메모 데이터 전송
+            res.json({memos: results});
+        }
+    })
+});
+
+//메모 수정
+app.post('/modify', (req, res)=>{
+    const title = req.body.title; //수정
+    const content = req.body.content;
+
+    const userID=req.session.userID;
+    console.log('메모 수정. 세션에서 가져온 userID:', req.session.userID);
+
+    const sql = 'UPDATE memo SET content=? WHERE userid=? AND title=?';
+    const params = [content, userID, title];
+
+    console.log(params);
+
+    connection.query(sql, params, (error) => {
+        if (error) {
+            console.error('메모 수정 오류', error);
+        } else {
+            res.redirect('/main.html');
+        }
+    });
+});
+
+//메모 삭제
+app.delete('/delete/:title', (req, res)=>{
+    const title = req.params.title;
+    const userID=req.session.userID;
+
+    console.log('메모 삭제. 세션에서 가져온 userID:', req.session.userID);
+
+    const sql = 'DELETE FROM memo WHERE userid=? and title=?';
+    const params = [userID, title];
+
+    connection.query(sql, params, (error) => {
+        if (error) {
+            console.error('메모 삭제 오류', error);
+        }
+        else{
+            res.json({ success: true });   
+        }
+    });
+});
+
 app.listen(port, () => {});
